@@ -1,0 +1,16 @@
+{
+    "permissions": {
+        "defaultMode": "auto",
+        "deny": [
+            "Bash(git push --force *)",
+            "Bash(git reset --hard *)",
+            "Bash(git clean *)",
+            "Bash(rm -rf *)",
+            "Bash(npm publish *)",
+            "Bash(docker system prune *)",
+            "Read(./.env)",
+            "Read(./.env.*)"
+        ]
+    },
+    "hooks": {}
+}
