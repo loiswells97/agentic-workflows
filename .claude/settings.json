@@ -1,5 +1,12 @@
 {
+    "enabledPlugins": {
+        "context7": true,
+        "typescript-lsp": true,
+        "ruby-lsp": true,
+        "pyright-lsp": true
+    },
     "permissions": {
+        "blockReadsOutsideWorkingDirectories": true,
         "defaultMode": "auto",
         "deny": [
             "Bash(git push --force *)",
@@ -10,22 +17,73 @@
             "Bash(docker system prune *)",
             "Read(./.env)",
             "Read(./.env.*)",
-            "Edit(.claude/settings.json)",
-            "Write(.claude/settings.json)"
+            "Edit(.claude/settings.json)"
         ],
-        "allow": ["WebSearch", "WebFetch"]
+        "allow": ["WebSearch", "WebFetch", "Edit(**)", "Read(**)"]
+    },
+    "sandbox": {
+        "enabled": true,
+        "allowUnsandboxedCommands": false,
+        "credentials": {
+            "files": [
+                { "path": "~/.ssh", "mode": "deny" },
+                { "path": "./.env", "mode": "deny" }
+            ]
+        }
     },
     "hooks": {
+        "SessionStart": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash .claude/scripts/detect-commands.sh",
+                        "statusMessage": "Determining relevant commands for this project..."
+                    },
+                    {
+                        "type": "command",
+                        "command": "bash .claude/scripts/install-lsps.sh",
+                        "statusMessage": "Checking relevant language servers..."
+                    }
+                ]
+            }
+        ],
         "PreToolUse": [
             {
                 "matcher": "Bash",
                 "hooks": [
+                {
+                    "type": "command",
+                    "if": "Bash(git *)",
+                    "command": "bash .claude/scripts/block-main-commit.sh",
+                    "statusMessage": "Checking branch before commit..."
+                },
+                {
+                    "type": "command",
+                    "command": "bash .claude/scripts/block-pinned-installs.sh",
+                    "statusMessage": "Checking for pinned package versions..."
+                }
+                ]
+            },
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
                     {
                         "type": "command",
-                        "if": "Bash(git commit *)",
-                        "command": "branch=$(git branch --show-current 2>/dev/null); if [ \"$branch\" = \"main\" ]; then echo '{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"Blocked: cannot git commit directly to main branch\"}}'; fi",
-                        "statusMessage": "Checking branch before commit..."
+                        "command": "bash .claude/scripts/block-manual-deps.sh",
+                        "statusMessage": "Checking for hand-written dependencies..."
                     }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
+                {
+                    "type": "command",
+                    "command": ".claude/scripts/sensors.sh lint"
+                }
                 ]
             }
         ]
