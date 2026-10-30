@@ -1,5 +1,5 @@
 # Tool configuration only - this repo is a workspace, not a distributable package.
-# The sensors in .claude/scripts/detect-commands.sh key off these sections:
+# The sensors in .claude/scripts/set-commands.sh key off these sections:
 # [tool.ruff] enables the lint sensor, [tool.pytest.ini_options] enables the check sensor.
 
 [tool.ruff]

@@ -37,11 +37,6 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "bash .claude/scripts/detect-commands.sh",
-                        "statusMessage": "Determining relevant commands for this project..."
-                    },
-                    {
-                        "type": "command",
                         "command": "bash .claude/scripts/install-lsps.sh",
                         "statusMessage": "Checking relevant language servers..."
                     }
